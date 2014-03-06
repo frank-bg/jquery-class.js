@@ -1,0 +1,7 @@
+{
+    "src_files": [
+        "bower_components/jquery/dist/jquery.js",
+        "src/jquery-class.js",
+        "tests/jquery-class.js"
+    ]
+}

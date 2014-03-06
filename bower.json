@@ -1,0 +1,26 @@
+{
+  "name": "jquery-class.js",
+  "version": "0.1.0",
+  "authors": [
+    "mach3 <http://github.com/mach3>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "1"
+  },
+  "description": "Class-like object by jQuery",
+  "main": "dist/jquery-class.js",
+  "keywords": [
+    "JavaScript",
+    "jQuery",
+    "Class"
+  ],
+  "homepage": "https://github.com/mach3/cookie-storage.js"
+}

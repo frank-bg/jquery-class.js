@@ -1,0 +1,32 @@
+{
+  "name": "jquery-class.js",
+  "version": "0.1.0",
+  "description": "Class-like object by jQuery",
+  "main": "dist/jquery-class.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mach3 <http://github.com/mach3>",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mach3/jquery-class.js.git"
+  },
+  "keywords": [
+    "jquery",
+    "class",
+    "javascript"
+  ],
+  "bugs": {
+    "url": "https://github.com/mach3/jquery-class.js/issues"
+  },
+  "homepage": "https://github.com/mach3/jquery-class.js"
+}
