@@ -6,49 +6,70 @@
      * @returns {Function}
      */
     $.Class = function(data){
-        var func, args;
-        func = function(){
+        var my = {};
+
+        // collection of dependencies
+        my.uses = [];
+
+        // function to return
+        my.func = function(){
             this._initExtends();
             if("function" === $.type(this.initialize)){
                 this.initialize.apply(this, arguments);
             }
         };
-        args = [true, func.prototype, $.Class.types.common];
-        if("array" === $.type(data.use)){
-            $.each(data.use, function(i, name){
-                if(name in $.Class.types){
-                    args.push($.Class.types[name]);
+
+        // append object to uses recursively
+        my.append = function(items){
+            if("array" !== $.type(items)){ return; }
+            $.each(items, function(i, item){
+                var obj = null;
+                switch($.type(item)){
+                    case "string": obj = $.Class.modules[item]; break;
+                    case "function": obj = item.prototype; break;
+                    case "object": obj = item; break;
+                    default: break;
                 }
+                if(! obj){ return; }
+                my.append(obj.use);
+                my.uses.push(obj);
             });
-        }
-        args.push(data);
-        $.extend.apply($, args);
-        return func;
+        };
+
+        // resolve dependencies, set as prop
+        my.append(data.use);
+        data.__extends__ = my.uses;
+
+        // merge all
+        my.args = [true, my.func.prototype, $.Class.modules.common];
+        $.extend.apply($, my.args.concat(my.uses).concat([data]));
+
+        return my.func;
     };
 
     /**
      * Prototypes with features
-     * Initialize feature by `_initName` function in constructor
+     * Initialize feature by `initialize` function in constructor
      */
-    var types = $.Class.types = {};
+    var modules = $.Class.modules = {};
 
     /**
      * Common
      * - Initialize dependencies
      * - Initialize element with `el`
      */
-    types.common = {
+    modules.common = {
         el: null,
         $el: null,
         use: [],
 
         _initExtends: function(){
             var my = this;
-            $.each(this.use, function(i, name){
-                var func = my["_init" + name.replace(/^[a-z]/, function(s){
-                    return s.toUpperCase();
-                })];
-                if($.isFunction(func)){ func.call(my); }
+
+            $.each(this.__extends__, function(i, o){
+                if($.isFunction(o.initialize)){
+                    o.initialize.call(my);
+                }
             });
             if(!! this.el){
                 this.$el = $(this.el);
@@ -60,8 +81,8 @@
      * Events
      * - Extend jQuery's event feature (on, off, trigger)
      */
-    types.events = {
-        _initEvents: function(){
+    modules.events = {
+        initialize: function(){
             var jq, my = this;
             jq = $(this);
             $.each(["on", "off", "trigger"], function(i, name){
@@ -74,13 +95,13 @@
      * Config
      * - Configure values in `options` prop
      */
-    types.config = {
+    modules.config = {
         defaults: {
             options: {}
         },
         options: null,
 
-        _initConfig: function(){
+        initialize: function(){
             this.options = {};
             this.config(this.defaults.options);
         },
@@ -118,7 +139,7 @@
      * - Configure values in `attributes` prop
      * - If extended with `events`, 'change' event triggered when a value changed
      */
-    types.attributes = {
+    modules.attributes = {
         EVENT_CHANGE: "change",
 
         defaults: {
@@ -126,7 +147,7 @@
         },
         attributes: null,
 
-        _initAttributes: function(){
+        initialize: function(){
             this.attributes = {};
             this.attr(this.defaults.attributes);
         },

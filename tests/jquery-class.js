@@ -26,10 +26,67 @@ describe("Common", function(){
             use: ["events", "config", "attributes"]
         });
         var app = new App();
-        ["_initEvents", "_initConfig", "_initAttributes"].forEach(function(name){
+        ["on", "off", "trigger", "config", "attr"].forEach(function(name){
             expect(u.type(app[name])).toBe("function");
         });
     });
+
+    it("Extends other class", function(){
+        var Foo = $.Class({
+            use: ["events", "attributes", "config"],
+            initialize: function(){
+                this.attr("foo", 1);
+            }
+        });
+        var Bar = $.Class({
+            use: [Foo],
+            initialize: function(){
+                this.config("bar", 2);
+            }
+        });
+
+        var app = new Bar();
+        var stack = [];
+
+        ["on", "off", "trigger", "config", "attr"].forEach(function(name){
+            expect(u.type(app[name])).toBe("function");
+        });
+
+        app.on("state", function(){
+            stack.push(this.attr("foo"));
+            stack.push(this.config("bar"));
+        });
+        app.trigger("state");
+
+        expect(stack).toEqual([1,2]);
+    });
+
+    it("Extends object", function(){
+        var Foo = {
+            stack: [],
+            initialize: function(){
+                this.stack.push("foo");
+            },
+            a: function(){ this.stack.push(1) },
+            b: function(){ this.stack.push(2) }
+        };
+        var Bar = $.Class({
+            use: [Foo],
+            initialize: function(value){
+                this.stack.push("bar");
+            },
+            c: function(){ this.stack.push(3); }
+        });
+
+        var app = new Bar(0);
+
+        app.a();
+        app.b();
+        app.c();
+
+        expect(app.stack).toEqual(["foo", "bar", 1,2,3]);
+    });
+
 
 });
 

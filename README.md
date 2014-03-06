@@ -7,8 +7,8 @@ Class-like object by jQuery
 ## Features
 
 - Create class-like object by jQuery method
-- Implement some basic features using `use` prop
-- Add more features by extending `$.Class.types`
+- Implement features using `use` prop (module name string, object, function)
+- Add module by extending `$.Class.modules`
 
 
 ## Get Started
@@ -20,16 +20,8 @@ then it returns class-like object.
 ```javascript
 var App = $.Class({
 
-	// Implement some features
+	// Implement features
 	use: ["events", "attributes"],
-
-	// Default values for attributes
-	defaults: {
-		attributes: {
-			name: null,
-			age: null
-		}
-	},
 
 	// Constructor
 	initialize: function(name, age){
@@ -39,6 +31,7 @@ var App = $.Class({
 		});
 	},
 
+	// its own method
 	hello: function(){
 		return "Hello, my name is "
 			+ this.attr("name")
@@ -52,14 +45,38 @@ var app = new App("John", 23);
 app.hello(); // "Hello, my name is John, 23 years old."
 ```
 
-## Prototypes
+## Extends
 
-Some prototypes having basic features are defined at `$.Class.types`
+`use` array accept string (as in $.Class.modules), object or function as its value.
+
+```javascript
+var Foo = $.Class({ ... });
+var Bar = function(){ ... };
+var Baz = { ... };
+
+var App = $.Class({
+	use: ["events", "attributes", Foo, Bar, Baz],
+	initialize: function(){ ... }
+});
+```
+
+## Modules
+
+Some modules having basic features are defined at `$.Class.modules`.
+You can implement them quickly by adding module name as string to `use` array.
 
 ### Common
 
-Initialize jQuery object named `$el` using `el` as selector or HTML element,
+Common module is always imported to class.
+This initialize jQuery object named `$el` using `el` as selector or HTML element,
 implement features specified in `use` array.
+
+```javascript
+var App = $.Class({
+	el: "#my-widget",
+	initialize: function(){ ... }
+});
+```
 
 ### Events
 
@@ -69,34 +86,85 @@ Implement jQuery event features (on, off, trigger) as its own.
 - **off()** - Alias to jQuery.on
 - **trigger()** - Alias to jQuery.trigger
 
+```javascript
+var App = $.Class({
+	use: ["events"]
+});
+var app = new App();
+app.on("state", function(){ ... });
+app.trigger("state");
+```
+
 ### Config
 
-Implement feature to configure values in `options`.
+Config module implements features to configure values in `options`.
 
 - **defaults.options** - Object to specify default values
 - **options** - Object to store values
 - **config()** - Setter or getter method
 
+```javascript
+var App = $.Class({
+	use: ["config"],
+	defaults: {
+		options: {
+			name: null,
+			age: null
+		}
+	}
+});
+
+var app = new App();
+
+app.config("name", "John");
+app.config({ age: 23 });
+app.config("name"); // "John"
+app.config(); // {"name": "John", "age": 23}
+```
+
 ### Attributes
 
-Implement feature to set or get values in `attributes`.
-'change' event is to be fired when a value changed by setter.
+Attributes module implements feature to set or get values in `attributes`.
+If events module is enabled, "change" event is to be fired when a value changed by setter.
 
 - **defaults.attributes** - Object to specify default values
 - **attributes** - Object to store values
 - **attr()** - Setter or getter method
 
+```javascript
+var App = $.Class({
+	use: ["events", "attributes"],
+	defaults: {
+		options: {
+			name: null,
+			age: null
+		}
+	}
+});
 
-## Adding more features
+var app = new App();
 
-To add more features to class, extend `$.Class.types`.
-You can initialize the feature with `_init[Name]` method, it will be called in constructor before `initialize` run.
+app.on(app.EVENT_CHANGE, function(){
+	// this will run when value changed
+});
+
+app.attr("name", "John");
+app.attr({ age: 23 });
+app.attr("name"); // "John"
+app.attr(); // {"name": "John", "age": 23}
+```
+
+
+## Adding Modules
+
+To add more modules to class, extend `$.Class.modules`.
+You can initialize the feature with `initialize` method, it will be called in constructor before `initialize` of instance runs.
 
 ```javascript
-$.extend($.Class.types, {
+$.extend($.Class.modules, {
 	foo: {
 		// initialize this feature
-		_initFoo: function(){ ... }
+		initialize: function(){ ... }
 	}
 });
 
