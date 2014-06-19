@@ -3,7 +3,7 @@
  * ---------------
  * Class-like object by jQuery
  *
- * @version 0.1.0 (2014-06-19)
+ * @version 0.1.1 (2014-06-19)
  * @author mach3 <http://github.com/mach3>
  * @license MIT
  * @url https://github.com/mach3/jquery-class.js
