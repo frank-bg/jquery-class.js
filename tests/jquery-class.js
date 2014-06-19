@@ -87,6 +87,110 @@ describe("Common", function(){
         expect(app.stack).toEqual(["foo", "bar", 1,2,3]);
     });
 
+    it("Delegate functions to the instance", function(){
+        var stack;
+        var emitter = new ($.Class({ use: ["events"] }));
+
+        // By name string
+        var Foo = $.Class({
+            initialize: function(){
+                stack = [];
+
+                this.delegate("foo");
+
+                emitter.on("foo", this.foo);
+                emitter.on("foo", this.bar);
+                emitter.trigger("foo");
+
+                expect(stack).toEqual([true, false]);
+            },
+            foo: function(){
+                stack.push(this instanceof Foo);
+            },
+            bar: function(){
+                stack.push(this instanceof Foo);
+            }
+        });
+        new Foo();
+
+        // By array of name string
+        var Bar = $.Class({
+            initialize: function(){
+                var my = this;
+
+                stack = [];
+                this.delegate(["foo", "bar"]);
+
+                ["foo", "bar", "baz"].forEach(function(name){
+                    emitter.on("bar", my[name]);
+
+                });
+                emitter.trigger("bar");
+
+                expect(stack).toEqual([true, true, false]);
+            },
+            foo: function(){
+                stack.push(this instanceof Bar);
+            },
+            bar: function(){
+                stack.push(this instanceof Bar);
+            },
+            baz: function(){
+                stack.push(this instanceof Bar);
+            }
+        });
+        new Bar();
+
+        // By regular expression
+        var Baz = $.Class({
+            initialize: function(){
+                var my = this;
+
+                stack = [];
+                this.delegate(/^b/);
+
+                ["foo", "bar", "baz"].forEach(function(name){
+                    emitter.on("baz", my[name]);
+                });
+                emitter.trigger("baz");
+
+                expect(stack).toEqual([false, true, true]);
+            },
+            foo: function(){
+                stack.push(this instanceof Baz);
+            },
+            bar: function(){
+                stack.push(this instanceof Baz);
+            },
+            baz: function(){
+                stack.push(this instanceof Baz);
+            }
+        });
+        new Baz();
+    });
+    
+    it("Delegate functions to any optional object", function(){
+        var stack = [];
+        var emitter = new ($.Class({use: ["events"]}));
+        var app = {
+            name: "app",
+            foo: function(){
+                stack.push(this.name === "app");
+            },
+            bar: function(){
+                stack.push(this.name === "app");
+            }
+        };
+        var delegate = $.Class.modules.common.delegate;
+
+        delegate("foo", app);
+
+        emitter.on("test", app.foo);
+        emitter.on("test", app.bar);
+        emitter.trigger("test");
+
+        expect(stack).toEqual([true, false]);
+    });
 
 });
 

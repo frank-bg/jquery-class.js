@@ -3,7 +3,7 @@
  * ---------------
  * Class-like object by jQuery
  *
- * @version 0.1.0 (2014-03-07)
+ * @version 0.1.0 (2014-06-19)
  * @author mach3 <http://github.com/mach3>
  * @license MIT
  * @url https://github.com/mach3/jquery-class.js
@@ -84,6 +84,32 @@
             if(!! this.el){
                 this.$el = $(this.el);
             }
+        },
+
+        /**
+         * Bind function to `this`
+         * @param {String|Array|Regexp} name
+         * @param {Object} obj (optional)
+         */
+        delegate: function(name, obj){
+            var type, process;
+            
+            obj = obj || this;
+            type = $.type(name);
+            process = function(i, name){
+                if(! $.isFunction(obj[name])){ return; }
+                obj[name] = $.proxy(obj[name], obj);
+            };
+            if(type === "regexp"){
+                $.each(obj, function(key, value){
+                    if(! name.test(key)){ return; }
+                    process(null, key);
+                });
+                return this;
+            }
+            name = (type !== "array") ? [name] : name;
+            $.each(name, process);
+            return this;
         }
     };
 
