@@ -71,12 +71,29 @@ Common module is always imported to class.
 This initialize jQuery object named `$el` using `el` as selector or HTML element,
 implement features specified in `use` array.
 
+- **delegate()** - Bind function to the instance
+
 ```javascript
 var App = $.Class({
 	el: "#my-widget",
 	initialize: function(){ ... }
 });
 ```
+
+Use `delegate` to bind function to the instance. `delegate` accept string name, array or regular expression as its first argument.
+
+```javascript
+var App = $.Class({
+	initialize: function(){
+		this.delegate("onClick");
+		something.on("click", this.onClick);
+	},
+	onClick: function(e){
+		// `this` is this instance
+	}
+});
+```
+
 
 ### Events
 
