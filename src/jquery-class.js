@@ -84,6 +84,7 @@
         delegate: function(name, obj){
             var type, process;
             
+            name = (name === void 0) ? /^on[A-Z]/ : name;
             obj = obj || this;
             type = $.type(name);
             process = function(i, name){

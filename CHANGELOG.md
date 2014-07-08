@@ -1,7 +1,11 @@
 
 # Change Log
 
-## Latest (2014-06-19)
+## 0.1.2 (2014-07-08)
+
+- (common) let `delegate` method allows empty argument (default is /^on[A-Z]/)
+
+## 0.1.1 (2014-06-19)
 
 - (common) add `delegate` method to bind function to the instance
 

@@ -167,6 +167,32 @@ describe("Common", function(){
             }
         });
         new Baz();
+
+        // Pass empty name
+        var Hoge = $.Class({
+            initialize: function(){
+                var my = this;
+
+                stack = [];
+                this.delegate();
+                ["onFoo", "bar", "onBaz"].forEach(function(name){
+                    emitter.on("hoge", my[name]);
+                });
+                emitter.trigger("hoge");
+
+                expect(stack).toEqual([true, false, true]);
+            },
+            onFoo: function(){
+                stack.push(this instanceof Hoge);
+            },
+            bar: function(){
+                stack.push(this instanceof Hoge);
+            },
+            onBaz: function(){
+                stack.push(this instanceof Hoge);
+            }
+        });
+        new Hoge();
     });
     
     it("Delegate functions to any optional object", function(){

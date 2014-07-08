@@ -1,6 +1,6 @@
 {
   "name": "jquery-class.js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "authors": [
     "mach3 <http://github.com/mach3>"
   ],
@@ -22,5 +22,5 @@
     "jQuery",
     "Class"
   ],
-  "homepage": "https://github.com/mach3/cookie-storage.js"
+  "homepage": "https://github.com/mach3/jquery-class.js"
 }

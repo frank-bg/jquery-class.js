@@ -3,7 +3,7 @@
  * ---------------
  * Class-like object by jQuery
  *
- * @version 0.1.1 (2014-06-19)
+ * @version 0.1.2 (2014-07-08)
  * @author mach3 <http://github.com/mach3>
  * @license MIT
  * @url https://github.com/mach3/jquery-class.js
@@ -94,6 +94,7 @@
         delegate: function(name, obj){
             var type, process;
             
+            name = (name === void 0) ? /^on[A-Z]/ : name;
             obj = obj || this;
             type = $.type(name);
             process = function(i, name){
