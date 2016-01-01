@@ -3,7 +3,7 @@
  * ---------------
  * Class-like object by jQuery
  *
- * @version 0.1.2 (2014-07-08)
+ * @version 0.2.0 (2016-01-01)
  * @author mach3 <http://github.com/mach3>
  * @license MIT
  * @url https://github.com/mach3/jquery-class.js
@@ -16,20 +16,37 @@
      * @returns {Function}
      */
     $.Class = function(data){
-        var my = {};
+        var Constructor, my = {};
 
         // collection of dependencies
-        my.uses = [];
+        my._extends = [];
 
         // function to return
-        my.func = function(){
-            this._initExtends();
-            if("function" === $.type(this.initialize)){
-                this.initialize.apply(this, arguments);
+        Constructor = function(){
+            var self = this;
+
+            // bind function to this
+            this.delegate(/^_/);
+
+            // call constructors in extends
+            $.each(this.__extends__, function(i, o){
+                if($.isFunction(o._initialize)){
+                    o._initialize.call(self);
+                }
+            });
+
+            // define element
+            if(!! this.el){
+                this.$el = $(this.el);
+            }
+
+            // call constructor
+            if("function" === $.type(this._initialize)){
+                this._initialize.apply(this, arguments);
             }
         };
 
-        // append object to uses recursively
+        // append object to `extends` recursively
         my.append = function(items){
             if("array" !== $.type(items)){ return; }
             $.each(items, function(i, item){
@@ -41,25 +58,25 @@
                     default: break;
                 }
                 if(! obj){ return; }
-                my.append(obj.use);
-                my.uses.push(obj);
+                my.append(obj._extends);
+                my._extends.push(obj);
             });
         };
 
         // resolve dependencies, set as prop
-        my.append(data.use);
-        data.__extends__ = my.uses;
+        my.append(data._extends);
+        data.__extends__ = my._extends;
 
         // merge all
-        my.args = [true, my.func.prototype, $.Class.modules.common];
-        $.extend.apply($, my.args.concat(my.uses).concat([data]));
+        my.args = [true, Constructor.prototype, $.Class.modules.common];
+        $.extend.apply($, my.args.concat(my._extends).concat([data]));
 
-        return my.func;
+        return Constructor;
     };
 
     /**
      * Prototypes with features
-     * Initialize feature by `initialize` function in constructor
+     * Initialize feature by `_initialize` function in constructor
      */
     var modules = $.Class.modules = {};
 
@@ -71,20 +88,7 @@
     modules.common = {
         el: null,
         $el: null,
-        use: [],
-
-        _initExtends: function(){
-            var my = this;
-
-            $.each(this.__extends__, function(i, o){
-                if($.isFunction(o.initialize)){
-                    o.initialize.call(my);
-                }
-            });
-            if(!! this.el){
-                this.$el = $(this.el);
-            }
-        },
+        _extends: [],
 
         /**
          * Bind function to `this`
@@ -94,7 +98,6 @@
         delegate: function(name, obj){
             var type, process;
             
-            name = (name === void 0) ? /^on[A-Z]/ : name;
             obj = obj || this;
             type = $.type(name);
             process = function(i, name){
@@ -119,7 +122,7 @@
      * - Extend jQuery's event feature (on, off, trigger)
      */
     modules.events = {
-        initialize: function(){
+        _initialize: function(){
             var jq, my = this;
             jq = $(this);
             $.each(["on", "off", "trigger"], function(i, name){
@@ -133,14 +136,12 @@
      * - Configure values in `options` prop
      */
     modules.config = {
-        defaults: {
-            options: {}
-        },
+        _options: null,
         options: null,
 
-        initialize: function(){
+        _initialize: function(){
             this.options = {};
-            this.config(this.defaults.options);
+            this.config(this._options);
         },
 
         /**
@@ -179,14 +180,12 @@
     modules.attributes = {
         EVENT_CHANGE: "change",
 
-        defaults: {
-            attributes: {}
-        },
+        _attributes: null,
         attributes: null,
 
-        initialize: function(){
+        _initialize: function(){
             this.attributes = {};
-            this.attr(this.defaults.attributes);
+            this.attr(this._attributes);
         },
 
         /**
@@ -224,5 +223,67 @@
             return this;
         }
     };
+
+    /**
+     * Manupulate module container
+     */
+    $.Class.instances = {};
+
+    /**
+     * Exports class by name
+     * @param {String} name
+     * @param {Object} data
+     * @param {Boolean} force (optional)
+     */
+    $.Class.exports = function(name, data, force){
+        var modules = $.Class.modules;
+        if((name in modules) && !force){
+            throw new Error("module named '%%' is already exists.".replace("%%", name));
+        }
+        modules[name] = $.Class(data);
+        return this;
+    };
+
+
+    /**
+     * Require class instance by name
+     * @param {String} name
+     * @param {Boolean} force
+     */
+    $.Class.require = function(name, force){
+        var modules, instances, instance;
+
+        modules = $.Class.modules;
+        instances = $.Class.instances;
+
+        switch(true){
+            case force:
+                if(name in modules){
+                    return new modules[name]();
+                }
+                break;
+            case name in instances:
+                return instances[name];
+            case name in modules:
+                instances[name] = new modules[name]();
+                return instances[name];
+            default: break;
+        }
+
+        return null;
+    };
+
+    /**
+     * Find module by name
+     */
+    $.Class.find = function(name){
+        return $.Class.modules[name];
+    };
+
+    /**
+     * Exports
+     */
+    $.exports = $.Class.exports;
+    $.require = $.Class.require;
 
 }(jQuery));

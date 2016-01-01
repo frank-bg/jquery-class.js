@@ -23,7 +23,7 @@ describe("Common", function(){
 
     it("Extends features", function(){
         var App = $.Class({
-            use: ["events", "config", "attributes"]
+            _extends: ["events", "config", "attributes"]
         });
         var app = new App();
         ["on", "off", "trigger", "config", "attr"].forEach(function(name){
@@ -33,14 +33,14 @@ describe("Common", function(){
 
     it("Extends other class", function(){
         var Foo = $.Class({
-            use: ["events", "attributes", "config"],
-            initialize: function(){
+            _extends: ["events", "attributes", "config"],
+            _initialize: function(){
                 this.attr("foo", 1);
             }
         });
         var Bar = $.Class({
-            use: [Foo],
-            initialize: function(){
+            _extends: [Foo],
+            _initialize: function(){
                 this.config("bar", 2);
             }
         });
@@ -64,15 +64,15 @@ describe("Common", function(){
     it("Extends object", function(){
         var Foo = {
             stack: [],
-            initialize: function(){
+            _initialize: function(){
                 this.stack.push("foo");
             },
             a: function(){ this.stack.push(1) },
             b: function(){ this.stack.push(2) }
         };
         var Bar = $.Class({
-            use: [Foo],
-            initialize: function(value){
+            _extends: [Foo],
+            _initialize: function(value){
                 this.stack.push("bar");
             },
             c: function(){ this.stack.push(3); }
@@ -89,11 +89,11 @@ describe("Common", function(){
 
     it("Delegate functions to the instance", function(){
         var stack;
-        var emitter = new ($.Class({ use: ["events"] }));
+        var emitter = new ($.Class({ _extends: ["events"] }));
 
         // By name string
         var Foo = $.Class({
-            initialize: function(){
+            _initialize: function(){
                 stack = [];
 
                 this.delegate("foo");
@@ -115,7 +115,7 @@ describe("Common", function(){
 
         // By array of name string
         var Bar = $.Class({
-            initialize: function(){
+            _initialize: function(){
                 var my = this;
 
                 stack = [];
@@ -143,7 +143,7 @@ describe("Common", function(){
 
         // By regular expression
         var Baz = $.Class({
-            initialize: function(){
+            _initialize: function(){
                 var my = this;
 
                 stack = [];
@@ -167,37 +167,11 @@ describe("Common", function(){
             }
         });
         new Baz();
-
-        // Pass empty name
-        var Hoge = $.Class({
-            initialize: function(){
-                var my = this;
-
-                stack = [];
-                this.delegate();
-                ["onFoo", "bar", "onBaz"].forEach(function(name){
-                    emitter.on("hoge", my[name]);
-                });
-                emitter.trigger("hoge");
-
-                expect(stack).toEqual([true, false, true]);
-            },
-            onFoo: function(){
-                stack.push(this instanceof Hoge);
-            },
-            bar: function(){
-                stack.push(this instanceof Hoge);
-            },
-            onBaz: function(){
-                stack.push(this instanceof Hoge);
-            }
-        });
-        new Hoge();
     });
     
     it("Delegate functions to any optional object", function(){
         var stack = [];
-        var emitter = new ($.Class({use: ["events"]}));
+        var emitter = new ($.Class({_extends: ["events"]}));
         var app = {
             name: "app",
             foo: function(){
@@ -223,7 +197,7 @@ describe("Common", function(){
 describe("Events", function(){
 
     var App = $.Class({
-        use: ["events"]
+        _extends: ["events"]
     });
 
     it("Having methods", function(){
@@ -278,7 +252,7 @@ describe("Events", function(){
 describe("Config", function(){
 
     var App = $.Class({
-        use: ["config"],
+        _extends: ["config"],
         defaults: {
             options: {
                 foo: null,
@@ -312,7 +286,7 @@ describe("Config", function(){
 describe("Attributes", function(){
 
     var App = $.Class({
-        use: ["attributes", "events"],
+        _extends: ["attributes", "events"],
         defaults: {
             attributes: {
                 foo: null,
@@ -359,3 +333,42 @@ describe("Attributes", function(){
 
 });
 
+
+describe("Modules", function(){
+
+    it("Export and require by name", function(){
+        $.Class.exports("foo", {
+            name: "foo"
+        });
+        expect($.Class.require("foo") instanceof $.Class.find("foo")).toBe(true);
+    });
+
+    it("Cannot named module which already exists (without `force`)", function(){
+        try {
+            $.Class.exports("foo", {});
+            expect(true).toBe(false);
+        } catch(e){
+            expect(true).toBe(true);
+        }
+
+        try {
+            $.Class.exports("foo", {}, true);
+            expect(true).toBe(true);
+        } catch(e){
+            expect(true).toBe(false);
+        }
+    });
+
+    it("Pass `true` to get a new instance forcely", function(){
+        $.Class.exports("bar", {});
+
+        var a = $.Class.require("bar");
+        var b = $.Class.require("bar");
+        var c = $.Class.require("bar", true);
+
+        expect(a === b).toBe(true);
+        expect(a === c).toBe(false);
+        expect(b === c).toBe(false);
+    });
+
+});
