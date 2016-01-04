@@ -1,5 +1,5 @@
 {
-  "name": "jquery-class.js",
+  "name": "jquery-class",
   "version": "0.2.0",
   "description": "Class-like object by jQuery",
   "main": "dist/jquery-class.js",
