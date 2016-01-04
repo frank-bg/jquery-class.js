@@ -8,7 +8,8 @@ Class-like object by jQuery
 
 - Create class-like object by jQuery method
 - Implement features using `use` prop (module name string, object, function)
-- Add module by extending `$.Class.modules`
+- Add module by extending `$.Class.modules` 
+- Manage modules by `$.exports`, `$.require`
 
 
 ## Get Started
@@ -21,10 +22,10 @@ then it returns class-like object.
 var App = $.Class({
 
 	// Implement features
-	use: ["events", "attributes"],
+	_extends: ["events", "attributes"],
 
 	// Constructor
-	initialize: function(name, age){
+	_initialize: function(name, age){
 		this.attr({
 			name: name,
 			age: age
@@ -47,7 +48,7 @@ app.hello(); // "Hello, my name is John, 23 years old."
 
 ## Extends
 
-`use` array accept string (as in $.Class.modules), object or function as its value.
+`_extends` array accept string (as in $.Class.modules), object or function as its value.
 
 ```javascript
 var Foo = $.Class({ ... });
@@ -55,8 +56,8 @@ var Bar = function(){ ... };
 var Baz = { ... };
 
 var App = $.Class({
-	use: ["events", "attributes", Foo, Bar, Baz],
-	initialize: function(){ ... }
+	_extends: ["events", "attributes", Foo, Bar, Baz],
+	_initialize: function(){ ... }
 });
 ```
 
@@ -76,7 +77,7 @@ implement features specified in `use` array.
 ```javascript
 var App = $.Class({
 	el: "#my-widget",
-	initialize: function(){ ... }
+	_initialize: function(){ ... }
 });
 ```
 
@@ -84,7 +85,7 @@ Use `delegate` to bind function to the instance. `delegate` accept string name, 
 
 ```javascript
 var App = $.Class({
-	initialize: function(){
+	_initialize: function(){
 		this.delegate("onClick");
 		something.on("click", this.onClick);
 	},
@@ -93,6 +94,8 @@ var App = $.Class({
 	}
 });
 ```
+
+Methods which started with `_` are automatically delegated.
 
 
 ### Events
@@ -105,7 +108,7 @@ Implement jQuery event features (on, off, trigger) as its own.
 
 ```javascript
 var App = $.Class({
-	use: ["events"]
+	_extends: ["events"]
 });
 var app = new App();
 app.on("state", function(){ ... });
@@ -116,18 +119,16 @@ app.trigger("state");
 
 Config module implements features to configure values in `options`.
 
-- **defaults.options** - Object to specify default values
+- **_options** - Object to specify default values
 - **options** - Object to store values
 - **config()** - Setter or getter method
 
 ```javascript
 var App = $.Class({
-	use: ["config"],
-	defaults: {
-		options: {
-			name: null,
-			age: null
-		}
+	_extends: ["config"],
+	_options: {
+		name: null,
+		age: null
 	}
 });
 
@@ -144,18 +145,16 @@ app.config(); // {"name": "John", "age": 23}
 Attributes module implements feature to set or get values in `attributes`.
 If events module is enabled, "change" event is to be fired when a value changed by setter.
 
-- **defaults.attributes** - Object to specify default values
+- **_attributes** - Object to specify default values
 - **attributes** - Object to store values
 - **attr()** - Setter or getter method
 
 ```javascript
 var App = $.Class({
-	use: ["events", "attributes"],
-	defaults: {
-		options: {
-			name: null,
-			age: null
-		}
+	_extends: ["events", "attributes"],
+	_attributes: {
+		name: null,
+		age: null
 	}
 });
 
@@ -192,12 +191,30 @@ var App = $.Class({
 ```
 
 
+## Manage modules
+
+Use `$.exports` to define custom module,
+`$.require` to get the instance by module name.
+
+```javascript
+// exports
+$.exports("foo", {
+	_initialize: function(){ ... }
+});
+
+// require
+var foo = $.require("foo");
+```
+
+Pass `true` to 2nd argument of `$.require` to get new instance forcely.
+
+```
+var bar = $.require("foo", true);
+
+foo ==== bar; // false
+```
+
+
 ## Author
 
 mach3 <http://github.com/mach3>
-
-
-
-
-
-
