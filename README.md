@@ -180,13 +180,13 @@ You can initialize the feature with `initialize` method, it will be called in co
 $.extend($.Class.modules, {
 	foo: {
 		// initialize this feature
-		initialize: function(){ ... }
+		_initialize: function(){ ... }
 	}
 });
 
 var App = $.Class({
 	use: ["foo"],
-	initialize: function(){ ... }
+	_initialize: function(){ ... }
 });
 ```
 

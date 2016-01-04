@@ -217,6 +217,7 @@
     /**
      * Manupulate module container
      */
+    $.Class.classes = {};
     $.Class.instances = {};
 
     /**
@@ -230,7 +231,7 @@
         if((name in modules) && !force){
             throw new Error("module named '%%' is already exists.".replace("%%", name));
         }
-        modules[name] = $.Class(data);
+        modules[name] = data;
         return this;
     };
 
@@ -241,21 +242,22 @@
      * @param {Boolean} force
      */
     $.Class.require = function(name, force){
-        var modules, instances, instance;
+        var modules, instances, feature;
 
         modules = $.Class.modules;
         instances = $.Class.instances;
+        feature = $.Class.find(name);
 
         switch(true){
             case force:
-                if(name in modules){
-                    return new modules[name]();
+                if(feature){
+                    return new feature();
                 }
                 break;
             case name in instances:
                 return instances[name];
             case name in modules:
-                instances[name] = new modules[name]();
+                instances[name] = new feature();
                 return instances[name];
             default: break;
         }
@@ -267,7 +269,16 @@
      * Find module by name
      */
     $.Class.find = function(name){
-        return $.Class.modules[name];
+        var classes, modules;
+
+        classes = $.Class.classes;
+        modules = $.Class.modules;
+
+        if(! (name in classes) && (name in modules)){
+            classes[name] = $.Class(modules[name]);
+        }
+
+        return classes[name];
     };
 
     /**

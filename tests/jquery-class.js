@@ -371,4 +371,40 @@ describe("Modules", function(){
         expect(b === c).toBe(false);
     });
 
+    it("Extend ancestors", function(){
+        $.Class.exports("person", {
+            _extends: ["attributes"],
+            _attributes: {
+                name: null,
+                age: null,
+                email: null
+            }
+        });
+
+        $.Class.exports("user", {
+            _extends: ["person"],
+            isUser: true,
+            hello: function(){
+                return "hello:" + this.attr("name");
+            }
+        });
+
+        $.Class.exports("owner", {
+            _extends: ["user"],
+            isOwner: true
+        });
+
+
+        var owner = $.Class.require("owner");
+        owner.attr({
+            name: "john",
+            age: 23,
+            email: "john@example.com"
+        });
+
+        expect(owner.attr("name")).toBe("john");
+        expect(owner.hello()).toBe("hello:john");
+        expect(owner.isUser && owner.isOwner).toBe(true);
+    });
+
 });
