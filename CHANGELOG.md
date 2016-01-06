@@ -1,6 +1,10 @@
 
 # Change Log
 
+## 0.2.1 (2016-01-04)
+
+- Enable ancestors to be extended
+
 ## 0.2.0 (2016-01-01)
 
 - Rename/Update API:
